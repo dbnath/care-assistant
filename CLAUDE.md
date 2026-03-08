@@ -8,6 +8,13 @@ An elderly care assistant system built as an **npm workspaces monorepo** contain
 - **Backend**: FastAPI service for managing patient records, health monitoring, medications, appointments, and file uploads
 - **Mobile**: React Native app (bare workflow) for caregivers to interact with the backend APIs
 
+## User types
+The application will be used by following types of users:
+   1. Founder - Institution such as Hospital, Care facilitie, Doctor's clinic 
+   2. Care giver - Employees who manages the patient
+   3. Patient - Patient associated with the Founder
+
+
 ## Monorepo Structure
 
 ```
