@@ -1,4 +1,14 @@
 rootProject.name = 'ElderlyCareApp'
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+
+// npm workspaces monorepo: packages are hoisted to the repo root node_modules.
+// Check for the specific package rather than just directory existence.
+def nodeModulesDir = file("../node_modules")
+if (!new File(nodeModulesDir, "@react-native-community/cli-platform-android").exists()) {
+    nodeModulesDir = file("../../../node_modules")
+}
+
+apply from: file("${nodeModulesDir}/@react-native-community/cli-platform-android/native_modules.gradle")
+applyNativeModulesSettingsGradle(settings)
+
 include ':app'
-includeBuild('../node_modules/@react-native/gradle-plugin')
+includeBuild("${nodeModulesDir}/@react-native/gradle-plugin")

@@ -1,18 +1,24 @@
 buildscript {
     ext {
-        buildToolsVersion = "34.0.0"
+        buildToolsVersion = "35.0.0"
         minSdkVersion = 21
-        compileSdkVersion = 34
-        targetSdkVersion = 34
+        compileSdkVersion = 35
+        targetSdkVersion = 35
         ndkVersion = "25.1.8937393"
-        kotlinVersion = "1.8.0"
+        kotlinVersion = "1.9.0"
+        // npm workspaces monorepo: react-native is hoisted to the repo root node_modules.
+        // REACT_NATIVE_NODE_MODULES_DIR must point to the react-native package itself
+        // (used by gesture-handler as: $REACT_NATIVE_NODE_MODULES_DIR/ReactAndroid/gradle.properties)
+        def rnDir = new File(rootDir, "../node_modules/react-native")
+        if (!rnDir.exists()) { rnDir = new File(rootDir, "../../../node_modules/react-native") }
+        REACT_NATIVE_NODE_MODULES_DIR = rnDir.absolutePath
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
+        classpath("com.android.tools.build:gradle:8.6.0")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
     }

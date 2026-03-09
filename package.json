@@ -18,6 +18,9 @@
     "lint": "npm run lint --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
   },
+  "overrides": {
+    "react-test-renderer": "18.2.0"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
