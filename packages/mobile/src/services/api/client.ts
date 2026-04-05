@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {Platform} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Android emulator routes host traffic through 10.0.2.2; iOS simulator uses localhost
 const API_BASE_URL =
@@ -15,26 +16,25 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor for adding auth token
+// Inject stored auth token on every request
 apiClient.interceptors.request.use(
   async config => {
-    // TODO: Add auth token from AsyncStorage when authentication is implemented
-    // const token = await AsyncStorage.getItem('auth_token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = await AsyncStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   error => Promise.reject(error),
 );
 
-// Response interceptor for error handling
+// On 401 clear token (session expired)
 apiClient.interceptors.response.use(
   response => response,
   async error => {
     if (error.response?.status === 401) {
-      // Handle unauthorized - clear token and redirect to login
-      // await AsyncStorage.removeItem('auth_token');
+      await AsyncStorage.removeItem('auth_token');
+      await AsyncStorage.removeItem('auth_user');
     }
     return Promise.reject(error);
   },

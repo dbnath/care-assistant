@@ -244,7 +244,7 @@ export default function UploadListScreen({navigation, route}: Props) {
   const handleCamera = () => {
     setShowSource(false);
     launchCamera(
-      {mediaType: 'photo', quality: 0.85, includeBase64: false},
+      {mediaType: 'photo', quality: 1, includeBase64: false},
       response => {
         if (response.didCancel || response.errorCode) {return;}
         const asset = response.assets?.[0];
@@ -260,7 +260,7 @@ export default function UploadListScreen({navigation, route}: Props) {
   const handleLibrary = () => {
     setShowSource(false);
     launchImageLibrary(
-      {mediaType: 'photo', quality: 0.85, includeBase64: false},
+      {mediaType: 'photo', quality: 1, includeBase64: false},
       response => {
         if (response.didCancel || response.errorCode) {return;}
         const asset = response.assets?.[0];

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -10,6 +10,47 @@ from .database import Base
 
 def _uuid() -> str:
     return str(uuid.uuid4())
+
+
+class UserDB(Base):
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    email: Mapped[str] = mapped_column(String(200), unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    role: Mapped[str] = mapped_column(String(20))  # founder | caregiver | patient
+    first_name: Mapped[str] = mapped_column(String(100))
+    last_name: Mapped[str] = mapped_column(String(100))
+    phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # For patient users: link to their PatientDB record (nullable for other roles)
+    patient_id: Mapped[Optional[str]] = mapped_column(
+        String(36), ForeignKey("patients.id"), nullable=True
+    )
+
+    # Caregiver → assigned patients (only populated when role == "caregiver")
+    assignments: Mapped[list["CaregiverPatientDB"]] = relationship(
+        back_populates="caregiver",
+        cascade="all, delete-orphan",
+        foreign_keys="CaregiverPatientDB.caregiver_id",
+    )
+
+    # Founder → employed caregivers (only populated when role == "founder")
+    employments: Mapped[list["FounderCaregiverDB"]] = relationship(
+        back_populates="founder",
+        cascade="all, delete-orphan",
+        foreign_keys="FounderCaregiverDB.founder_id",
+    )
+
+    # Caregiver → their employer (only populated when role == "caregiver")
+    employment: Mapped[Optional["FounderCaregiverDB"]] = relationship(
+        back_populates="caregiver",
+        uselist=False,
+        cascade="all, delete-orphan",
+        foreign_keys="FounderCaregiverDB.caregiver_id",
+    )
 
 
 class PatientDB(Base):
@@ -42,6 +83,52 @@ class PatientDB(Base):
     )
     uploads: Mapped[list["UploadDB"]] = relationship(
         back_populates="patient", cascade="all, delete-orphan"
+    )
+
+    # Caregivers assigned to this patient
+    caregiver_assignments: Mapped[list["CaregiverPatientDB"]] = relationship(
+        back_populates="patient", cascade="all, delete-orphan"
+    )
+
+
+class CaregiverPatientDB(Base):
+    """Association table: caregiver (UserDB) ↔ patient (PatientDB)."""
+
+    __tablename__ = "caregiver_patients"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    caregiver_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"))
+    patient_id: Mapped[str] = mapped_column(String(36), ForeignKey("patients.id"))
+    assigned_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    caregiver: Mapped["UserDB"] = relationship(
+        back_populates="assignments", foreign_keys=[caregiver_id]
+    )
+    patient: Mapped["PatientDB"] = relationship(back_populates="caregiver_assignments")
+
+
+class FounderCaregiverDB(Base):
+    """Association table: founder (UserDB) employs caregiver (UserDB)."""
+
+    __tablename__ = "founder_caregivers"
+    __table_args__ = (
+        # A caregiver can only be employed by one founder at a time
+        UniqueConstraint("caregiver_id", name="uq_caregiver_employer"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    founder_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"))
+    caregiver_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"))
+    employed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    job_title: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    founder: Mapped["UserDB"] = relationship(
+        back_populates="employments", foreign_keys=[founder_id]
+    )
+    caregiver: Mapped["UserDB"] = relationship(
+        back_populates="employment", foreign_keys=[caregiver_id]
     )
 
 

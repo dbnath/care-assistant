@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import settings
 from .database import engine
 from .db_models import Base  # noqa: F401 — registers all ORM models
-from .routers import appointments, health, medications, patients, uploads
+from .routers import appointments, auth, caregivers, founders, health, medications, patients, uploads
 
 
 @asynccontextmanager
@@ -39,6 +39,9 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router, prefix=settings.api_prefix)
+app.include_router(founders.router, prefix=settings.api_prefix)
+app.include_router(caregivers.router, prefix=settings.api_prefix)
 app.include_router(patients.router, prefix=settings.api_prefix)
 app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(medications.router, prefix=settings.api_prefix)

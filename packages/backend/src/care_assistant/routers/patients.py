@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..db_models import EmergencyContactDB, PatientDB
+from ..models.caregiver import CaregiverSummary
 from ..models.patient import EmergencyContact, EmergencyContactRelation, Patient
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -133,3 +134,23 @@ def delete_patient(patient_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Patient not found")
     db.delete(db_patient)
     db.commit()
+
+
+@router.get("/{patient_id}/caregivers", response_model=list[CaregiverSummary])
+def list_patient_caregivers(patient_id: str, db: Session = Depends(get_db)):
+    """List all caregivers assigned to a patient."""
+    db_patient = db.query(PatientDB).filter(PatientDB.id == patient_id).first()
+    if not db_patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return [
+        CaregiverSummary(
+            id=a.caregiver.id,
+            first_name=a.caregiver.first_name,
+            last_name=a.caregiver.last_name,
+            email=a.caregiver.email,
+            phone=a.caregiver.phone,
+            assigned_at=a.assigned_at,
+            assignment_notes=a.notes,
+        )
+        for a in db_patient.caregiver_assignments
+    ]
