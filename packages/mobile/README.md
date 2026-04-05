@@ -52,6 +52,20 @@ npm start
 npm run ios
 ```
 
+### Recommended Version Matrix  
+  For an elderly care app targeting real users, cover:
+  ┌──────────┬─────────────┬────────────────────────────────┐                                             
+  │ Priority │ iOS Version │             Reason             |
+  ├──────────┼─────────────┼────────────────────────────────┤ 
+  │ High     │ iOS 26.4    │ Latest, physical device        │
+  ├──────────┼─────────────┼────────────────────────────────┤
+  │ High     │ iOS 26.0    │ Start of iOS 26 cycle          |
+  ├──────────┼─────────────┼────────────────────────────────┤
+  │ Medium   │ iOS 17.x    │ Many older iPhones still on 17 │
+  ├──────────┼─────────────┼────────────────────────────────┤
+  │ Medium   │ iOS 18.x    │ Common on mid-range devices    │
+  └──────────┴─────────────┴────────────────────────────────┘    
+
 ### Run on Android
 
 ```bash

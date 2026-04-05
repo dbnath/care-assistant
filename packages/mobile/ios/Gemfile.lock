@@ -127,6 +127,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  bigdecimal
   cocoapods (~> 1.14)
 
 BUNDLED WITH

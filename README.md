@@ -127,6 +127,7 @@ npm start
 npm run ios
 
 # Run on Android
+emulator -avd myEmu -gpu host
 npm run android
 
 # Tests

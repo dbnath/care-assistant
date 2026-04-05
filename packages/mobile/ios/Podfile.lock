@@ -1065,15 +1065,14 @@ PODS:
     - React-perflogger (= 0.73.2)
   - RNCAsyncStorage (1.24.0):
     - React-Core
-  - RNGestureHandler (2.30.0):
+  - RNGestureHandler (2.14.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-  - RNScreens (3.37.0):
+  - RNScreens (3.29.0):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
-    - React-RCTImage
   - SocketRocket (0.6.1)
   - Yoga (1.14.0)
 
@@ -1132,8 +1131,8 @@ DEPENDENCIES:
   - React-utils (from `../../../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
-  - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
-  - RNScreens (from `../../../node_modules/react-native-screens`)
+  - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNScreens (from `../node_modules/react-native-screens`)
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1247,9 +1246,9 @@ EXTERNAL SOURCES:
   RNCAsyncStorage:
     :path: "../../../node_modules/@react-native-async-storage/async-storage"
   RNGestureHandler:
-    :path: "../../../node_modules/react-native-gesture-handler"
+    :path: "../node_modules/react-native-gesture-handler"
   RNScreens:
-    :path: "../../../node_modules/react-native-screens"
+    :path: "../node_modules/react-native-screens"
   Yoga:
     :path: "../../../node_modules/react-native/ReactCommon/yoga"
 
@@ -1307,8 +1306,8 @@ SPEC CHECKSUMS:
   React-utils: dd1e04ea7105dc58637939b50f1a74a5dd634ec4
   ReactCommon: 35e3b6a1c75d462acb0155e38e627b98d5bf586b
   RNCAsyncStorage: b6410dead2732b5c72a7fdb1ecb5651bbcf4674b
-  RNGestureHandler: f1c8544c074f74911e713ede852b07c51c0cf8f2
-  RNScreens: b12996ef8ef492d56d126400e8aef6e613c13ef6
+  RNGestureHandler: 55447e4051459b0b7f5f5173567f92286d01cf88
+  RNScreens: 8d1521c6e375a79dbd4525efaf21704cc64ac0cf
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: 13c8ef87792450193e117976337b8527b49e8c03
 

@@ -19,7 +19,16 @@
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
   },
   "overrides": {
-    "react-test-renderer": "18.2.0"
+    "react-test-renderer": "18.2.0",
+    "react-native-gesture-handler": "2.14.1",
+    "react-native-screens": "3.29.0",
+    "@react-navigation/stack": {
+      "react-native-gesture-handler": "2.14.1",
+      "react-native-screens": "3.29.0"
+    },
+    "@react-navigation/bottom-tabs": {
+      "react-native-screens": "3.29.0"
+    }
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
