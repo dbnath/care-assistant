@@ -24,6 +24,11 @@ import AppointmentListScreen from '../screens/appointments/AppointmentListScreen
 import AddEditAppointmentScreen from '../screens/appointments/AddEditAppointmentScreen';
 import UploadsScreen from '../screens/uploads/UploadsScreen';
 import UploadListScreen from '../screens/uploads/UploadListScreen';
+import CaregiversScreen from '../screens/caregivers/CaregiversScreen';
+import CaregiverDetailScreen from '../screens/caregivers/CaregiverDetailScreen';
+import AssignPatientScreen from '../screens/caregivers/AssignPatientScreen';
+import EmployCaregiverScreen from '../screens/caregivers/EmployCaregiverScreen';
+import AssignCaregiverToPatientScreen from '../screens/caregivers/AssignCaregiverToPatientScreen';
 
 const AuthStack = createStackNavigator<AuthStackParamList>();
 const MainStack = createStackNavigator<RootStackParamList>();
@@ -55,6 +60,11 @@ function MainNavigator() {
       <MainStack.Screen name="Patients" component={PatientsScreen} options={{title: 'Patients'}} />
       <MainStack.Screen name="PatientDetail" component={PatientDetailScreen} options={{title: ''}} />
       <MainStack.Screen name="AddEditPatient" component={AddEditPatientScreen} options={{title: ''}} />
+      <MainStack.Screen name="Caregivers" component={CaregiversScreen} options={{title: 'Caregivers'}} />
+      <MainStack.Screen name="CaregiverDetail" component={CaregiverDetailScreen} options={{title: ''}} />
+      <MainStack.Screen name="AssignPatient" component={AssignPatientScreen} options={{title: 'Assign Patient'}} />
+      <MainStack.Screen name="EmployCaregiver" component={EmployCaregiverScreen} options={{title: 'Employ Caregiver'}} />
+      <MainStack.Screen name="AssignCaregiverToPatient" component={AssignCaregiverToPatientScreen} options={{title: 'Assign Caregiver'}} />
       <MainStack.Screen name="Medications" component={MedicationsScreen} options={{title: 'Select Patient'}} />
       <MainStack.Screen name="MedicationList" component={MedicationListScreen} options={{title: ''}} />
       <MainStack.Screen name="AddEditMedication" component={AddEditMedicationScreen} options={{title: ''}} />
