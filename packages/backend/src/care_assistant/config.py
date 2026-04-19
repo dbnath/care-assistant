@@ -26,5 +26,9 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = 10
     allowed_upload_extensions: list[str] = [".pdf", ".jpg", ".jpeg", ".png"]
 
+    # AWS settings
+    aws_s3_bucket: str = ""
+    aws_region: str = "us-east-1"
+
 
 settings = Settings()
