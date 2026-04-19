@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  FlatList,
+  ScrollView,
   TextInput,
   StyleSheet,
   ActivityIndicator,
@@ -101,37 +101,14 @@ export default function AssignCaregiverToPatientScreen({
         </View>
       </View>
 
-      <FlatList
+      <ScrollView
         style={styles.flatList}
-        data={available ?? []}
-        keyExtractor={item => item.id}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={
-          (available ?? []).length === 0 ? styles.listEmpty : styles.listContent
+          available.length === 0 ? styles.listEmpty : styles.listContent
         }
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        renderItem={({item}) => {
-          const initials =
-            `${item.first_name[0]}${item.last_name[0]}`.toUpperCase();
-          return (
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => handleAssign(item)}
-              disabled={isPending}
-              activeOpacity={0.75}>
-              <View style={styles.rowAvatar}>
-                <Text style={styles.rowAvatarText}>{initials}</Text>
-              </View>
-              <View style={styles.rowBody}>
-                <Text style={styles.rowName}>
-                  {item.first_name} {item.last_name}
-                </Text>
-                <Text style={styles.rowSub}>{item.email}</Text>
-              </View>
-              <Text style={styles.rowAction}>Assign →</Text>
-            </TouchableOpacity>
-          );
-        }}
-        ListEmptyComponent={() => (
+        showsVerticalScrollIndicator={false}>
+        {available.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Text style={styles.bigIcon}>✅</Text>
             <Text style={styles.emptyTitle}>
@@ -140,8 +117,36 @@ export default function AssignCaregiverToPatientScreen({
                 : 'All employed caregivers are already assigned to this patient.'}
             </Text>
           </View>
+        ) : (
+          available.map((item, idx) => {
+            const initials =
+              `${item.first_name[0]}${item.last_name[0]}`.toUpperCase();
+            return (
+              <React.Fragment key={item.id}>
+                <TouchableOpacity
+                  style={styles.row}
+                  onPress={() => handleAssign(item)}
+                  disabled={isPending}
+                  activeOpacity={0.75}>
+                  <View style={styles.rowAvatar}>
+                    <Text style={styles.rowAvatarText}>{initials}</Text>
+                  </View>
+                  <View style={styles.rowBody}>
+                    <Text style={styles.rowName}>
+                      {item.first_name} {item.last_name}
+                    </Text>
+                    <Text style={styles.rowSub}>{item.email}</Text>
+                  </View>
+                  <Text style={styles.rowAction}>Assign →</Text>
+                </TouchableOpacity>
+                {idx < available.length - 1 && (
+                  <View style={styles.separator} />
+                )}
+              </React.Fragment>
+            );
+          })
         )}
-      />
+      </ScrollView>
     </View>
   );
 }
