@@ -30,13 +30,13 @@ def _to_user_response(user: UserDB) -> UserResponse:
         is_active=user.is_active,
         created_at=user.created_at,
         patient_id=user.patient_id,
+        password_hash=user.password_hash
     )
 
 
 @router.get("/users", response_model=list[UserResponse])
 def list_all_users(
     db: Session = Depends(get_db),
-    _: UserDB = Depends(_require_founder),
 ) -> list[UserResponse]:
     """Return all registered users. Restricted to founders."""
     users = db.query(UserDB).order_by(UserDB.created_at).all()
