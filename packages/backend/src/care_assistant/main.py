@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from .config import settings
 from .database import engine
@@ -48,9 +47,6 @@ app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(medications.router, prefix=settings.api_prefix)
 app.include_router(appointments.router, prefix=settings.api_prefix)
 app.include_router(uploads.router, prefix=settings.api_prefix)
-
-# Serve uploaded files as static assets
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 @app.get("/")
