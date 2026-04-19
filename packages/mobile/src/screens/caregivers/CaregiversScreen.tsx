@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  FlatList,
+  ScrollView,
   TextInput,
   StyleSheet,
   ActivityIndicator,
@@ -116,26 +116,17 @@ export default function CaregiversScreen() {
         </View>
       </View>
 
-      <FlatList
+      <ScrollView
         style={styles.list}
-        data={filtered ?? []}
-        keyExtractor={item => item.id}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl refreshing={!!isFetching} onRefresh={refetch} />
         }
         contentContainerStyle={
-          (filtered ?? []).length === 0 ? styles.listEmpty : styles.listContent
+          filtered.length === 0 ? styles.listEmpty : styles.listContent
         }
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        renderItem={({item}) => (
-          <CaregiverRow
-            caregiver={item}
-            onPress={() =>
-              navigation.navigate('CaregiverDetail', {caregiverId: item.id})
-            }
-          />
-        )}
-        ListEmptyComponent={() => (
+        showsVerticalScrollIndicator={false}>
+        {filtered.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Text style={styles.bigIcon}>👤</Text>
             <Text style={styles.emptyTitle}>
@@ -147,8 +138,22 @@ export default function CaregiversScreen() {
               </Text>
             )}
           </View>
+        ) : (
+          filtered.map((item, idx) => (
+            <React.Fragment key={item.id}>
+              <CaregiverRow
+                caregiver={item}
+                onPress={() =>
+                  navigation.navigate('CaregiverDetail', {caregiverId: item.id})
+                }
+              />
+              {idx < filtered.length - 1 && (
+                <View style={styles.separator} />
+              )}
+            </React.Fragment>
+          ))
         )}
-      />
+      </ScrollView>
 
       {/* FAB */}
       <TouchableOpacity
