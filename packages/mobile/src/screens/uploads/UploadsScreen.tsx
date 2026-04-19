@@ -15,7 +15,7 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navigation/types';
 import {COLORS, SPACING} from '../../config/constants';
-import {usePatients} from '../../hooks/usePatients';
+import {useRoleAwarePatients} from '../../hooks/useRoleAwarePatients';
 import {Patient} from '../../types/patient';
 
 type NavProp = StackNavigationProp<RootStackParamList, 'Uploads'>;
@@ -42,7 +42,7 @@ function PatientRow({patient, onPress}: {patient: Patient; onPress: () => void})
 
 export default function UploadsScreen() {
   const navigation = useNavigation<NavProp>();
-  const {data: patients, isLoading, isError, refetch, isFetching} = usePatients();
+  const {data: patients, isLoading, isError, refetch, isFetching} = useRoleAwarePatients();
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {

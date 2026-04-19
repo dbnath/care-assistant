@@ -13,6 +13,8 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navigation/types';
 import {COLORS, SPACING} from '../../config/constants';
 import {usePatient, useDeletePatient} from '../../hooks/usePatients';
+import {useAuth} from '../../context/AuthContext';
+import {useCaregivers, useUnassignPatient} from '../../hooks/useCaregivers';
 
 type Props = {
   navigation: StackNavigationProp<RootStackParamList, 'PatientDetail'>;
@@ -51,6 +53,9 @@ export default function PatientDetailScreen({navigation, route}: Props) {
   const {patientId} = route.params;
   const {data: patient, isLoading, isError} = usePatient(patientId);
   const {mutate: deletePatient, isPending: isDeleting} = useDeletePatient();
+  const {user} = useAuth();
+  const {data: allCaregivers, refetch: refetchCaregivers} = useCaregivers();
+  const {mutate: unassignPatient, isPending: isUnassigning} = useUnassignPatient();
 
   useLayoutEffect(() => {
     if (!patient) {
@@ -69,6 +74,33 @@ export default function PatientDetailScreen({navigation, route}: Props) {
       ),
     });
   }, [navigation, patient, patientId]);
+
+  // Caregivers currently assigned to this patient (founder-only view)
+  const assignedCaregivers =
+    user?.role === 'founder' && allCaregivers
+      ? allCaregivers.filter(c =>
+          c.assigned_patients.some(p => p.id === patientId),
+        )
+      : [];
+
+  function handleUnassignCaregiver(caregiverId: string, caregiverName: string) {
+    Alert.alert(
+      'Remove Caregiver',
+      `Remove ${caregiverName} from this patient?`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () =>
+            unassignPatient(
+              {caregiverId, patientId},
+              {onSuccess: () => refetchCaregivers()},
+            ),
+        },
+      ],
+    );
+  }
 
   const handleDelete = () => {
     if (!patient) {
@@ -194,6 +226,52 @@ export default function PatientDetailScreen({navigation, route}: Props) {
           <Text style={styles.notesText}>{patient.medical_notes}</Text>
         </View>
       ) : null}
+
+      {/* Assigned Caregivers — founder only */}
+      {user?.role === 'founder' && (
+        <View style={styles.card}>
+          <View style={styles.caregiverCardHeader}>
+            <Text style={styles.cardTitle}>Assigned Caregivers</Text>
+            <TouchableOpacity
+              style={styles.assignCaregiverBtn}
+              onPress={() =>
+                navigation.navigate('AssignCaregiverToPatient', {patientId})
+              }>
+              <Text style={styles.assignCaregiverBtnText}>+ Assign</Text>
+            </TouchableOpacity>
+          </View>
+          {assignedCaregivers.length === 0 ? (
+            <Text style={styles.noCaregivers}>No caregivers assigned yet.</Text>
+          ) : (
+            assignedCaregivers.map((c, idx) => (
+              <View
+                key={c.id}
+                style={[
+                  styles.caregiverRow,
+                  idx < assignedCaregivers.length - 1 && styles.caregiverRowBorder,
+                ]}>
+                <View style={styles.caregiverInfo}>
+                  <Text style={styles.caregiverName}>
+                    {c.first_name} {c.last_name}
+                  </Text>
+                  <Text style={styles.caregiverSub}>{c.email}</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() =>
+                    handleUnassignCaregiver(
+                      c.id,
+                      `${c.first_name} ${c.last_name}`,
+                    )
+                  }
+                  disabled={isUnassigning}
+                  style={styles.removeCaregiverBtn}>
+                  <Text style={styles.removeCaregiverBtnText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
+        </View>
+      )}
 
       {/* Delete */}
       <TouchableOpacity
@@ -331,4 +409,43 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.error,
   },
+
+  caregiverCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.xs,
+  },
+  assignCaregiverBtn: {
+    backgroundColor: COLORS.secondary + '15',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  assignCaregiverBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.secondary,
+  },
+  noCaregivers: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    paddingVertical: SPACING.md,
+    textAlign: 'center',
+  },
+  caregiverRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+  },
+  caregiverRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  caregiverInfo: {flex: 1},
+  caregiverName: {fontSize: 15, fontWeight: '600', color: COLORS.text},
+  caregiverSub: {fontSize: 12, color: COLORS.textSecondary, marginTop: 2},
+  removeCaregiverBtn: {padding: SPACING.sm},
+  removeCaregiverBtnText: {fontSize: 16, color: COLORS.error, fontWeight: '700'},
 });

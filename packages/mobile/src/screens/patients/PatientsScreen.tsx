@@ -15,7 +15,8 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../navigation/types';
 import {COLORS, SPACING} from '../../config/constants';
-import {usePatients} from '../../hooks/usePatients';
+import {useRoleAwarePatients} from '../../hooks/useRoleAwarePatients';
+import {useAuth} from '../../context/AuthContext';
 import {Patient} from '../../types/patient';
 
 type NavProp = StackNavigationProp<RootStackParamList, 'Patients'>;
@@ -71,7 +72,8 @@ function PatientCard({
 
 export default function PatientsScreen() {
   const navigation = useNavigation<NavProp>();
-  const {data: patients, isLoading, isError, refetch, isFetching} = usePatients();
+  const {user} = useAuth();
+  const {data: patients, isLoading, isError, refetch, isFetching} = useRoleAwarePatients();
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -175,13 +177,15 @@ export default function PatientsScreen() {
         )}
       </ScrollView>
 
-      {/* FAB */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('AddEditPatient', {})}
-        activeOpacity={0.85}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      {/* FAB — founders only */}
+      {user?.role === 'founder' && (
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate('AddEditPatient', {})}
+          activeOpacity={0.85}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 }

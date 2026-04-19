@@ -13,13 +13,18 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../navigation/types';
 import {COLORS, SPACING} from '../config/constants';
-import {usePatients} from '../hooks/usePatients';
 import {useAuth} from '../context/AuthContext';
+import {useHomeStats} from '../hooks/useHomeStats';
 import {UserRole} from '../types/auth';
 
 type HomeNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
-type TopLevelScreen = 'Patients' | 'Medications' | 'Appointments' | 'Uploads';
+type TopLevelScreen =
+  | 'Patients'
+  | 'Caregivers'
+  | 'Medications'
+  | 'Appointments'
+  | 'Uploads';
 
 interface NavCard {
   title: string;
@@ -38,6 +43,14 @@ const NAV_CARDS: NavCard[] = [
     color: COLORS.primary,
     screen: 'Patients',
     roles: ['founder', 'caregiver'],
+  },
+  {
+    title: 'Caregivers',
+    description: 'Employ & manage your care team',
+    icon: '🧑‍⚕️',
+    color: COLORS.secondary,
+    screen: 'Caregivers',
+    roles: ['founder'],
   },
   {
     title: 'Medications',
@@ -90,10 +103,9 @@ function getInitials(first: string, last: string): string {
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeNavigationProp>();
-  const {data: patients, isLoading: patientsLoading} = usePatients();
   const {user, signOut} = useAuth();
+  const stats = useHomeStats();
 
-  const patientCount = patients?.length ?? 0;
   const visibleCards = NAV_CARDS.filter(
     c => !user || c.roles.includes(user.role),
   );
@@ -103,6 +115,38 @@ export default function HomeScreen() {
       {text: 'Cancel', style: 'cancel'},
       {text: 'Sign Out', style: 'destructive', onPress: signOut},
     ]);
+  }
+
+  /**
+   * For the patient role, Medications/Appointments/Uploads skip the
+   * patient-picker and navigate directly to the patient's own data.
+   */
+  function handleCardPress(screen: TopLevelScreen) {
+    if (user?.role === 'patient' && user.patient_id) {
+      const patientName = `${user.first_name} ${user.last_name}`;
+      if (screen === 'Medications') {
+        navigation.navigate('MedicationList', {
+          patientId: user.patient_id,
+          patientName,
+        });
+        return;
+      }
+      if (screen === 'Appointments') {
+        navigation.navigate('AppointmentList', {
+          patientId: user.patient_id,
+          patientName,
+        });
+        return;
+      }
+      if (screen === 'Uploads') {
+        navigation.navigate('UploadList', {
+          patientId: user.patient_id,
+          patientName,
+        });
+        return;
+      }
+    }
+    navigation.navigate(screen);
   }
 
   return (
@@ -156,23 +200,22 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Stats — only meaningful for caregiver/founder */}
-        {user?.role !== 'patient' && (
+        {/* Stats — hidden when empty */}
+        {stats.length > 0 && (
           <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>
-                {patientsLoading ? '—' : patientCount}
-              </Text>
-              <Text style={styles.statLabel}>Patients</Text>
-            </View>
-            <View style={[styles.statCard, styles.statCardMiddle]}>
-              <Text style={styles.statValue}>—</Text>
-              <Text style={styles.statLabel}>Today's Tasks</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>—</Text>
-              <Text style={styles.statLabel}>Upcoming</Text>
-            </View>
+            {stats.map((stat, idx) => (
+              <View
+                key={stat.label}
+                style={[
+                  styles.statCard,
+                  idx > 0 && idx < stats.length && styles.statCardBorder,
+                ]}>
+                <Text style={styles.statValue}>
+                  {stat.value === null ? '—' : stat.value}
+                </Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            ))}
           </View>
         )}
 
@@ -184,7 +227,7 @@ export default function HomeScreen() {
               <TouchableOpacity
                 key={card.screen}
                 style={styles.card}
-                onPress={() => navigation.navigate(card.screen)}
+                onPress={() => handleCardPress(card.screen)}
                 activeOpacity={0.75}>
                 <View
                   style={[
@@ -220,7 +263,6 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: COLORS.background},
   scrollContent: {paddingBottom: SPACING.xl},
 
-  // Header
   header: {
     backgroundColor: COLORS.primary,
     paddingHorizontal: SPACING.lg,
@@ -234,12 +276,7 @@ const styles = StyleSheet.create({
   },
   greetingBlock: {flex: 1},
   greeting: {fontSize: 14, color: 'rgba(255,255,255,0.75)', marginBottom: 2},
-  userName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: COLORS.white,
-    marginBottom: 6,
-  },
+  userName: {fontSize: 24, fontWeight: '700', color: COLORS.white, marginBottom: 6},
   roleBadge: {
     alignSelf: 'flex-start',
     borderRadius: 20,
@@ -249,7 +286,6 @@ const styles = StyleSheet.create({
   },
   roleBadgeText: {fontSize: 12, fontWeight: '700'},
   userEmail: {fontSize: 12, color: 'rgba(255,255,255,0.6)', marginTop: 2},
-
   rightCol: {alignItems: 'center', gap: SPACING.xs},
   avatar: {
     width: 52,
@@ -270,7 +306,6 @@ const styles = StyleSheet.create({
   },
   signOutText: {fontSize: 11, color: COLORS.white, fontWeight: '600'},
 
-  // Stats
   statsRow: {
     flexDirection: 'row',
     backgroundColor: COLORS.white,
@@ -284,29 +319,16 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   statCard: {flex: 1, alignItems: 'center', paddingVertical: SPACING.md},
-  statCardMiddle: {
+  statCardBorder: {
     borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: COLORS.border,
+    borderLeftColor: COLORS.border,
   },
-  statValue: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 2,
-  },
-  statLabel: {fontSize: 11, color: COLORS.textSecondary},
+  statValue: {fontSize: 22, fontWeight: '700', color: COLORS.text, marginBottom: 2},
+  statLabel: {fontSize: 11, color: COLORS.textSecondary, textAlign: 'center'},
 
-  // Section
   section: {marginTop: SPACING.lg, paddingHorizontal: SPACING.lg},
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
+  sectionTitle: {fontSize: 17, fontWeight: '600', color: COLORS.text, marginBottom: SPACING.md},
 
-  // Cards Grid
   cardsGrid: {flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.md},
   card: {
     width: '47%',
@@ -329,16 +351,7 @@ const styles = StyleSheet.create({
   },
   cardIcon: {fontSize: 22},
   cardTitle: {fontSize: 15, fontWeight: '700', marginBottom: 4},
-  cardDescription: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    lineHeight: 16,
-    marginBottom: SPACING.sm,
-  },
-  cardFooter: {
-    borderTopWidth: 1,
-    paddingTop: SPACING.xs,
-    marginTop: SPACING.xs,
-  },
+  cardDescription: {fontSize: 12, color: COLORS.textSecondary, lineHeight: 16, marginBottom: SPACING.sm},
+  cardFooter: {borderTopWidth: 1, paddingTop: SPACING.xs, marginTop: SPACING.xs},
   cardLink: {fontSize: 12, fontWeight: '600'},
 });
