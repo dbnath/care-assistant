@@ -40,7 +40,7 @@ function PatientCard({
   onPress: () => void;
 }) {
   const initials = `${patient.first_name[0]}${patient.last_name[0]}`.toUpperCase();
-  const primaryContact = patient.emergency_contacts.find(c => c.is_primary);
+  const primaryContact = patient.emergency_contacts ? patient.emergency_contacts.find(c => c.is_primary) : null;
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
