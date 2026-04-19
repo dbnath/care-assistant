@@ -1,0 +1,17 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored — never commit it.
+
+aws_region     = "us-east-1"
+instance_type  = "t2.micro"
+
+# Must be globally unique across all AWS accounts
+s3_bucket_name = "care-assistant-uploads-YOURNAME"
+
+# Name for the key pair in the AWS console
+key_name = "care-assistant-key"
+
+# Path to your local SSH public key (the private key is stored as EC2_SSH_KEY GitHub Secret)
+public_key_path = "~/.ssh/id_rsa.pub"
+
+# HTTPS URL of your GitHub repo
+github_repo = "https://github.com/YOUR_ORG/care-assistant.git"
