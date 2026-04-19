@@ -1,0 +1,24 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /opt/care-assistant
+            git pull origin main
+            source packages/backend/.venv/bin/activate
+            pip install --quiet -r packages/backend/requirements.txt
+            pip install --quiet -e packages/backend/
+            sudo systemctl restart care-assistant
