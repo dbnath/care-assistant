@@ -88,10 +88,11 @@ export default function EmployCaregiverScreen({navigation}: Props) {
       </View>
 
       <FlatList
-        data={available}
+        style={styles.flatList}
+        data={available ?? []}
         keyExtractor={item => item.id}
         contentContainerStyle={
-          available.length === 0 ? styles.listEmpty : styles.list
+          (available ?? []).length === 0 ? styles.listEmpty : styles.listContent
         }
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({item}) => {
@@ -116,7 +117,7 @@ export default function EmployCaregiverScreen({navigation}: Props) {
             </TouchableOpacity>
           );
         }}
-        ListEmptyComponent={
+        ListEmptyComponent={() => (
           <View style={styles.emptyWrap}>
             <Text style={styles.bigIcon}>
               {search ? '🔍' : '✅'}
@@ -127,7 +128,7 @@ export default function EmployCaregiverScreen({navigation}: Props) {
                 : 'All registered caregivers are already employed.'}
             </Text>
           </View>
-        }
+        )}
       />
     </View>
   );
@@ -155,8 +156,9 @@ const styles = StyleSheet.create({
   },
   searchIcon: {fontSize: 14, marginRight: 4},
   searchInput: {flex: 1, height: 40, fontSize: 14, color: COLORS.text},
-  list: {padding: SPACING.lg},
-  listEmpty: {flex: 1, justifyContent: 'center'},
+  flatList: {flex: 1},
+  listContent: {padding: SPACING.lg},
+  listEmpty: {flexGrow: 1, justifyContent: 'center', padding: SPACING.lg},
   separator: {height: SPACING.sm},
   row: {
     flexDirection: 'row',

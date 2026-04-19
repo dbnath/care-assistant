@@ -88,10 +88,11 @@ export default function AssignPatientScreen({navigation, route}: Props) {
       </View>
 
       <FlatList
-        data={unassigned}
+        style={styles.flatList}
+        data={unassigned ?? []}
         keyExtractor={item => item.id!}
         contentContainerStyle={
-          unassigned.length === 0 ? styles.listEmpty : styles.list
+          (unassigned ?? []).length === 0 ? styles.listEmpty : styles.listContent
         }
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({item}) => {
@@ -116,7 +117,7 @@ export default function AssignPatientScreen({navigation, route}: Props) {
             </TouchableOpacity>
           );
         }}
-        ListEmptyComponent={
+        ListEmptyComponent={() => (
           <View style={styles.emptyWrap}>
             <Text style={styles.bigIcon}>✅</Text>
             <Text style={styles.emptyTitle}>
@@ -125,7 +126,7 @@ export default function AssignPatientScreen({navigation, route}: Props) {
                 : 'All patients are already assigned.'}
             </Text>
           </View>
-        }
+        )}
       />
     </View>
   );
@@ -153,8 +154,9 @@ const styles = StyleSheet.create({
   },
   searchIcon: {fontSize: 14, marginRight: 4},
   searchInput: {flex: 1, height: 40, fontSize: 14, color: COLORS.text},
-  list: {padding: SPACING.lg},
-  listEmpty: {flex: 1, justifyContent: 'center'},
+  flatList: {flex: 1},
+  listContent: {padding: SPACING.lg},
+  listEmpty: {flexGrow: 1, justifyContent: 'center', padding: SPACING.lg},
   separator: {height: SPACING.sm},
   row: {
     flexDirection: 'row',

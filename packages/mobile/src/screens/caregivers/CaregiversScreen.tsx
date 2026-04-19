@@ -117,13 +117,14 @@ export default function CaregiversScreen() {
       </View>
 
       <FlatList
-        data={filtered}
+        style={styles.list}
+        data={filtered ?? []}
         keyExtractor={item => item.id}
         refreshControl={
-          <RefreshControl refreshing={isFetching} onRefresh={refetch} />
+          <RefreshControl refreshing={!!isFetching} onRefresh={refetch} />
         }
         contentContainerStyle={
-          filtered.length === 0 ? styles.listEmpty : styles.list
+          (filtered ?? []).length === 0 ? styles.listEmpty : styles.listContent
         }
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         renderItem={({item}) => (
@@ -134,7 +135,7 @@ export default function CaregiversScreen() {
             }
           />
         )}
-        ListEmptyComponent={
+        ListEmptyComponent={() => (
           <View style={styles.emptyWrap}>
             <Text style={styles.bigIcon}>👤</Text>
             <Text style={styles.emptyTitle}>
@@ -146,7 +147,7 @@ export default function CaregiversScreen() {
               </Text>
             )}
           </View>
-        }
+        )}
       />
 
       {/* FAB */}
@@ -195,8 +196,9 @@ const styles = StyleSheet.create({
   searchIcon: {fontSize: 14, marginRight: 4},
   searchInput: {flex: 1, height: 40, fontSize: 14, color: COLORS.text},
 
-  list: {padding: SPACING.lg, paddingBottom: 80},
-  listEmpty: {flex: 1, justifyContent: 'center'},
+  list: {flex: 1},
+  listContent: {padding: SPACING.lg, paddingBottom: 80},
+  listEmpty: {flexGrow: 1, justifyContent: 'center', padding: SPACING.lg, paddingBottom: 80},
   separator: {height: SPACING.sm},
 
   row: {
